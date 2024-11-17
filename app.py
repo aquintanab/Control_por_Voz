@@ -40,45 +40,63 @@ st.lottie(animation, width=350)
 
 st.write("Toca el Botón y habla")
 
-st.button = Button("Habla🎙️", width=200)
+button_html = """
+    <button id="speak-button" style="font-size: 50px; background: none; border: none; cursor: pointer; outline: none;">
+        🎙️
+    </button>
+    <script>
+        let recognition;
+        document.getElementById('speak-button').addEventListener('click', function() {
+            if (!recognition) {
+                // Solicitar acceso al micrófono
+                recognition = new webkitSpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'es-ES';  // Establecer el idioma a español
 
-st.button.js_on_event("button_click", CustomJS(code="""
-    var recognition = new webkitSpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
- 
-    recognition.onresult = function (e) {
-        var value = "";
-        for (var i = e.resultIndex; i < e.results.length; ++i) {
-            if (e.results[i].isFinal) {
-                value += e.results[i][0].transcript;
+                recognition.onstart = function() {
+                    console.log("Reconocimiento de voz iniciado.");
+                };
+
+                recognition.onerror = function(event) {
+                    console.log("Error en el reconocimiento: " + event.error);
+                    alert("Hubo un error al intentar acceder al micrófono.");
+                };
+
+                recognition.onresult = function (event) {
+                    var value = "";
+                    for (var i = event.resultIndex; i < event.results.length; ++i) {
+                        if (event.results[i].isFinal) {
+                            value += event.results[i][0].transcript;
+                        }
+                    }
+                    if (value != "") {
+                        document.lastEventDetail = value;  // Guardar en variable global
+                        window.parent.postMessage({ type: "streamlit_set_value", value: value }, "*");  // Enviar el valor a Streamlit
+                    }
+                };
+
+                // Iniciar el reconocimiento de voz
+                recognition.start();
             }
-        }
-        if ( value != "") {
-            document.dispatchEvent(new CustomEvent("GET_TEXT", {detail: value}));
-        }
-    }
-    recognition.start();
-    """))
+        });
+    </script>
+"""
 
-result = streamlit_bokeh_events(
-    stt_button,
-    events="GET_TEXT",
-    key="listen",
-    refresh_on_update=False,
-    override_height=75,
-    debounce_time=0)
+st.markdown(button_html, unsafe_allow_html=True)
 
-if result:
-    if "GET_TEXT" in result:
-        st.write(result.get("GET_TEXT"))
-        client1.on_publish = on_publish                            
-        client1.connect(broker,port)  
-        message =json.dumps({"Act1":result.get("GET_TEXT").strip()})
-        ret= client1.publish("voice_ctrl", message)
+# Capturar el texto del reconocimiento de voz utilizando streamlit_js_eval
+captured_text = streamlit_js_eval(js_code="document.lastEventDetail || ''", key="capture")
 
-    
+if captured_text:
+    st.write(f"Texto reconocido: {captured_text}")
+    # Publicar el mensaje al servidor MQTT
+    client1.on_publish = on_publish
+    client1.connect(broker, port)
+    message = json.dumps({"Act1": captured_text.strip()})
+    client1.publish("riego_Aqb", message)
+
     try:
         os.mkdir("temp")
-    except:
+    except FileExistsError:
         pass
