@@ -11,6 +11,8 @@ from streamlit_lottie import st_lottie
 import json
 from gtts import gTTS
 from googletrans import Translator
+import time
+from streamlit_js_eval import streamlit_js_eval
 
 def on_publish(client,userdata,result):             #create function for callback
     print("el dato ha sido publicado \n")
@@ -43,18 +45,10 @@ st.lottie(animation,width =350)
 st.write("Toca el Botón y habla ")
 
 button_html = """
-<div style="display: flex; justify-content: center; align-items: center; margin-top: 20px;">
-    <button id="speak-button" style="
-        background: none;
-        border: none;
-        cursor: pointer;
-        outline: none;
-    ">
-        <img src="https://github.com/aquintanab/Control_por_Voz/blob/riego/mic.png" alt="Habla" style="width: 80px;">
-    </button>
-</div>
+<button id="speak-button" style="background: none; border: none; cursor: pointer; outline: none;">
+    <img src="https://raw.githubusercontent.com/tu_usuario/tu_repositorio/main/ruta_a_imagen/microfono.png" alt="Habla" style="width: 80px;">
+</button>
 <script>
-    // Vincular el botón con reconocimiento de voz
     document.getElementById('speak-button').addEventListener('click', function() {
         var recognition = new webkitSpeechRecognition();
         recognition.continuous = true;
@@ -68,36 +62,26 @@ button_html = """
                 }
             }
             if (value != "") {
-                const streamlitEvent = new CustomEvent("GET_TEXT", { detail: value });
-                document.dispatchEvent(streamlitEvent);
+                document.lastEventDetail = value;  // Guardar en variable global
             }
         };
         recognition.start();
     });
 </script>
 """
-
-# Mostrar el botón en Streamlit
 st.markdown(button_html, unsafe_allow_html=True)
 
-result = streamlit_bokeh_events(
-    stt_button,
-    events="GET_TEXT",
-    key="listen",
-    refresh_on_update=False,
-    override_height=75,
-    debounce_time=0)
+# Capturar texto del reconocimiento de voz
+captured_text = streamlit_js_eval(js_code="document.lastEventDetail || ''", key="capture")
+if captured_text:
+    st.write(f"Texto reconocido: {captured_text}")
+    # Publicar el mensaje al servidor MQTT
+    client1.on_publish = on_publish
+    client1.connect(broker, port)
+    message = json.dumps({"Act1": captured_text.strip()})
+    client1.publish("riego_Aqb", message)
 
-if result:
-    if "GET_TEXT" in result:
-        st.write(result.get("GET_TEXT"))
-        client1.on_publish = on_publish                            
-        client1.connect(broker,port)  
-        message =json.dumps({"Act1":result.get("GET_TEXT").strip()})
-        ret= client1.publish("riego_Aqb", message)
-
-    
     try:
         os.mkdir("temp")
-    except:
+    except FileExistsError:
         pass
