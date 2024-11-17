@@ -42,26 +42,43 @@ st.lottie(animation,width =350)
 
 st.write("Toca el Botón y habla ")
 
-stt_button = Button(label=" Habla ", width=200)
+button_html = """
+<div style="display: flex; justify-content: center; align-items: center; margin-top: 20px;">
+    <button id="speak-button" style="
+        background: none;
+        border: none;
+        cursor: pointer;
+        outline: none;
+    ">
+        <img src="https://raw.githubusercontent.com/tu_usuario/tu_repositorio/main/ruta_a_imagen/microfono.png" alt="Habla" style="width: 80px;">
+    </button>
+</div>
+<script>
+    // Vincular el botón con reconocimiento de voz
+    document.getElementById('speak-button').addEventListener('click', function() {
+        var recognition = new webkitSpeechRecognition();
+        recognition.continuous = true;
+        recognition.interimResults = true;
 
-stt_button.js_on_event("button_click", CustomJS(code="""
-    var recognition = new webkitSpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
- 
-    recognition.onresult = function (e) {
-        var value = "";
-        for (var i = e.resultIndex; i < e.results.length; ++i) {
-            if (e.results[i].isFinal) {
-                value += e.results[i][0].transcript;
+        recognition.onresult = function (event) {
+            var value = "";
+            for (var i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    value += event.results[i][0].transcript;
+                }
             }
-        }
-        if ( value != "") {
-            document.dispatchEvent(new CustomEvent("GET_TEXT", {detail: value}));
-        }
-    }
-    recognition.start();
-    """))
+            if (value != "") {
+                const streamlitEvent = new CustomEvent("GET_TEXT", { detail: value });
+                document.dispatchEvent(streamlitEvent);
+            }
+        };
+        recognition.start();
+    });
+</script>
+"""
+
+# Mostrar el botón en Streamlit
+st.markdown(button_html, unsafe_allow_html=True)
 
 result = streamlit_bokeh_events(
     stt_button,
