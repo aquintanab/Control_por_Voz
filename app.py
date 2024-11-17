@@ -40,7 +40,24 @@ st.lottie(animation, width=350)
 
 st.write("Toca el Botón y habla")
 
-stt_button = Button(label=" Inicio ", width=200)
+st.markdown("""
+    <style>
+        .stButton button {
+            background-color: black;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 25px;
+            cursor: pointer;
+            border-radius: 5px;
+        }
+        .stButton button:hover {
+            background-color: #333;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
+stt_button = Button(label=" Habla 🎙️ ", width=200)
 
 stt_button.js_on_event("button_click", CustomJS(code="""
     var recognition = new webkitSpeechRecognition();
