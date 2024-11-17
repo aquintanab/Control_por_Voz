@@ -40,48 +40,47 @@ with open('voice.json') as source:
 st.lottie(animation,width =350)
 
 
-
-
 st.write("Toca el Botón y habla ")
 
-button_html = """
-<button id="speak-button" style="background: none; border: none; cursor: pointer; outline: none;">
-    <img src="mic.png" alt="Habla" style="width: 80px;">
-</button>
-<script>
-    document.getElementById('speak-button').addEventListener('click', function() {
-        var recognition = new webkitSpeechRecognition();
-        recognition.continuous = true;
-        recognition.interimResults = true;
+stt_button = Button(label="🎙️", width=25)
 
-        recognition.onresult = function (event) {
-            var value = "";
-            for (var i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    value += event.results[i][0].transcript;
-                }
+stt_button.js_on_event("button_click", CustomJS(code="""
+    var recognition = new webkitSpeechRecognition();
+    recognition.continuous = true;
+    recognition.interimResults = true;
+ 
+    recognition.onresult = function (e) {
+        var value = "";
+        for (var i = e.resultIndex; i < e.results.length; ++i) {
+            if (e.results[i].isFinal) {
+                value += e.results[i][0].transcript;
             }
-            if (value != "") {
-                document.lastEventDetail = value;  // Guardar en variable global
-            }
-        };
-        recognition.start();
-    });
-</script>
-"""
-st.markdown(button_html, unsafe_allow_html=True)
+        }
+        if ( value != "") {
+            document.dispatchEvent(new CustomEvent("GET_TEXT", {detail: value}));
+        }
+    }
+    recognition.start();
+    """))
 
-# Capturar texto del reconocimiento de voz
-captured_text = streamlit_js_eval(js_code="document.lastEventDetail || ''", key="capture")
-if captured_text:
-    st.write(f"Texto reconocido: {captured_text}")
-    # Publicar el mensaje al servidor MQTT
-    client1.on_publish = on_publish
-    client1.connect(broker, port)
-    message = json.dumps({"Act1": captured_text.strip()})
-    client1.publish("riego_Aqb", message)
+result = streamlit_bokeh_events(
+    stt_button,
+    events="GET_TEXT",
+    key="listen",
+    refresh_on_update=False,
+    override_height=75,
+    debounce_time=0)
 
+if result:
+    if "GET_TEXT" in result:
+        st.write(result.get("GET_TEXT"))
+        client1.on_publish = on_publish                            
+        client1.connect(broker,port)  
+        message =json.dumps({"Act1":result.get("GET_TEXT").strip()})
+        ret= client1.publish("voice_ctrl", message)
+
+    
     try:
         os.mkdir("temp")
-    except FileExistsError:
+    except:
         pass
