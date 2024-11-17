@@ -16,3 +16,4 @@ xyzservices >=2021.09.1
 bokeh==2.4.3
 Streamlit-bokeh-events
 streamlit-lottie
+streamlit-js-eval
