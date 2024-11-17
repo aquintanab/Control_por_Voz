@@ -46,7 +46,7 @@ st.write("Toca el Botón y habla ")
 
 button_html = """
 <button id="speak-button" style="background: none; border: none; cursor: pointer; outline: none;">
-    <img src="https://raw.githubusercontent.com/tu_usuario/tu_repositorio/main/ruta_a_imagen/microfono.png" alt="Habla" style="width: 80px;">
+    <img src="https://github.com/aquintanab/Control_por_Voz/blob/riego/mic.png" alt="Habla" style="width: 80px;">
 </button>
 <script>
     document.getElementById('speak-button').addEventListener('click', function() {
