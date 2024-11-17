@@ -7,8 +7,12 @@ from PIL import Image
 import time
 import glob
 import paho.mqtt.client as paho
+from PIL import Image as Image, ImageOps as ImagOps
+import glob
+from gtts import gTTS
+import os
 import time
-from streamlit_lottie import st.lottie
+from streamlit_lottie import st_lottie
 import json
 from gtts import gTTS
 from googletrans import Translator
@@ -32,6 +36,8 @@ client1.on_message = on_message
 
 st.title("Garden Voice")
 st.subheader("CONTROL POR VOZ")
+#image = Image.open('Instructor.png')
+#st.image(image)
 with open('voice.json') as source:
      animation=json.load(source)
 st.lottie(animation,width =350)
