@@ -29,70 +29,56 @@ port=1883
 client1= paho.Client("NANA")
 client1.on_message = on_message
 
-
-
 st.title("Garden Voice")
 st.subheader("Control por Voz")
-#image = Image.open('Instructor.png')
-#st.image(image)
-with open('voice.json') as source:
-     animation=json.load(source)
-st.lottie(animation,width =350)
 
+# Animación Lottie
+with open('voice.json') as source:
+    animation=json.load(source)
+st.lottie(animation, width=350)
 
 st.write("Toca el Botón y habla ")
 
+# Crear el botón HTML con el emoji y conectar con JavaScript para iniciar el reconocimiento de voz
 button_html = """
-    <button style="font-size: 50px; background: none; border: none; cursor: pointer; outline: none; transition: transform 0.2s;">
+    <button id="speak-button" style="font-size: 50px; background: none; border: none; cursor: pointer; outline: none;">
         🎙️
     </button>
-    <style>
-        button:hover {
-            transform: scale(1.2);
-            color: red;
-        }
-    </style>
-"""
+    <script>
+        document.getElementById('speak-button').addEventListener('click', function() {
+            var recognition = new webkitSpeechRecognition();
+            recognition.continuous = true;
+            recognition.interimResults = true;
 
+            recognition.onresult = function (event) {
+                var value = "";
+                for (var i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        value += event.results[i][0].transcript;
+                    }
+                }
+                if (value != "") {
+                    document.lastEventDetail = value;  // Guardar en variable global
+                }
+            };
+            recognition.start();
+        });
+    </script>
+"""
 st.markdown(button_html, unsafe_allow_html=True)
 
-stt_button.js_on_event("button_click", CustomJS(code="""
-    var recognition = new webkitSpeechRecognition();
-    recognition.continuous = true;
-    recognition.interimResults = true;
- 
-    recognition.onresult = function (e) {
-        var value = "";
-        for (var i = e.resultIndex; i < e.results.length; ++i) {
-            if (e.results[i].isFinal) {
-                value += e.results[i][0].transcript;
-            }
-        }
-        if ( value != "") {
-            document.dispatchEvent(new CustomEvent("GET_TEXT", {detail: value}));
-        }
-    }
-    recognition.start();
-    """))
+# Capturar el texto del reconocimiento de voz utilizando streamlit_js_eval
+captured_text = streamlit_js_eval(js_code="document.lastEventDetail || ''", key="capture")
 
-result = streamlit_bokeh_events(
-    stt_button,
-    events="GET_TEXT",
-    key="listen",
-    refresh_on_update=False,
-    override_height=75,
-    debounce_time=0)
+if captured_text:
+    st.write(f"Texto reconocido: {captured_text}")
+    # Publicar el mensaje al servidor MQTT
+    client1.on_publish = on_publish
+    client1.connect(broker, port)
+    message = json.dumps({"Act1": captured_text.strip()})
+    client1.publish("riego_Aqb", message)
 
-if result:
-    if "GET_TEXT" in result:
-        st.write(result.get("GET_TEXT"))
-        client1.on_publish = on_publish                            
-        client1.connect(broker,port)  
-        message =json.dumps({"Act1":result.get("GET_TEXT").strip()})
-        ret= client1.publish("voice_ctrl", message)
-
-    
     try:
         os.mkdir("temp")
-    except:
+    except FileExistsError:
         pass
