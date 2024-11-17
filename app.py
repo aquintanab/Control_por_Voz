@@ -30,7 +30,7 @@ client1.on_message = on_message
 
 
 st.title("Garden Voice")
-st.subheader("CONTROL POR VOZ")
+st.subheader("Control por Voz")
 #image = Image.open('Instructor.png')
 #st.image(image)
 with open('voice.json') as source:
