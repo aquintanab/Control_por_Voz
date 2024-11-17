@@ -28,19 +28,18 @@ client1.on_message = on_message
 
 
 
-st.title("INTERFACES MULTIMODALES")
+st.title("Garden Voice")
 st.subheader("CONTROL POR VOZ")
-
-image = Image.open('voice_ctrl.jpg')
-
-st.image(image, width=200)
+with open('voice.json') as source:
+     animation=json.load(source)
+st.lottie(animation,width =350)
 
 
 
 
 st.write("Toca el Botón y habla ")
 
-stt_button = Button(label=" Inicio ", width=200)
+stt_button = Button(label=" Habla ", width=200)
 
 stt_button.js_on_event("button_click", CustomJS(code="""
     var recognition = new webkitSpeechRecognition();
