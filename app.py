@@ -56,7 +56,7 @@ button_html = """
 
 st.markdown(button_html, unsafe_allow_html=True)
 
-st.markdown.js_on_event("button_click", CustomJS(code="""
+st_markdown.js_on_event("button_click", CustomJS(code="""
     var recognition = new webkitSpeechRecognition();
     recognition.continuous = true;
     recognition.interimResults = true;
