@@ -14,19 +14,19 @@ from googletrans import Translator
 import time
 from streamlit_js_eval import streamlit_js_eval
 
-def on_publish(client,userdata,result):             #create function for callback
-    print("el dato ha sido publicado \n")
+def on_publish(client, userdata, result):  # Crear función para callback
+    print("El dato ha sido publicado \n")
     pass
 
 def on_message(client, userdata, message):
     global message_received
     time.sleep(2)
-    message_received=str(message.payload.decode("utf-8"))
+    message_received = str(message.payload.decode("utf-8"))
     st.write(message_received)
 
-broker="broker.mqttdashboard.com"
-port=1883
-client1= paho.Client("NANA")
+broker = "broker.mqttdashboard.com"
+port = 1883
+client1 = paho.Client("NANA")
 client1.on_message = on_message
 
 st.title("Garden Voice")
@@ -34,10 +34,10 @@ st.subheader("Control por Voz")
 
 # Animación Lottie
 with open('voice.json') as source:
-    animation=json.load(source)
+    animation = json.load(source)
 st.lottie(animation, width=350)
 
-st.write("Toca el Botón y habla ")
+st.write("Toca el Botón y habla")
 
 # Crear el botón HTML con el emoji y conectar con JavaScript para iniciar el reconocimiento de voz
 button_html = """
@@ -46,9 +46,20 @@ button_html = """
     </button>
     <script>
         document.getElementById('speak-button').addEventListener('click', function() {
+            // Solicitar acceso al micrófono
             var recognition = new webkitSpeechRecognition();
             recognition.continuous = true;
             recognition.interimResults = true;
+            recognition.lang = 'es-ES';  // Establecer el idioma a español
+
+            recognition.onstart = function() {
+                console.log("Reconocimiento de voz iniciado.");
+            };
+
+            recognition.onerror = function(event) {
+                console.log("Error en el reconocimiento: " + event.error);
+                alert("Hubo un error al intentar acceder al micrófono.");
+            };
 
             recognition.onresult = function (event) {
                 var value = "";
@@ -61,10 +72,13 @@ button_html = """
                     document.lastEventDetail = value;  // Guardar en variable global
                 }
             };
+
+            // Iniciar el reconocimiento de voz
             recognition.start();
         });
     </script>
 """
+
 st.markdown(button_html, unsafe_allow_html=True)
 
 # Capturar el texto del reconocimiento de voz utilizando streamlit_js_eval
