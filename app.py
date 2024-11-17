@@ -24,6 +24,7 @@ def on_message(client, userdata, message):
     message_received = str(message.payload.decode("utf-8"))
     st.write(message_received)
 
+
 broker = "broker.mqttdashboard.com"
 port = 1883
 client1 = paho.Client("NANA")
@@ -45,36 +46,40 @@ button_html = """
         🎙️
     </button>
     <script>
+        let recognition;
         document.getElementById('speak-button').addEventListener('click', function() {
-            // Solicitar acceso al micrófono
-            var recognition = new webkitSpeechRecognition();
-            recognition.continuous = true;
-            recognition.interimResults = true;
-            recognition.lang = 'es-ES';  // Establecer el idioma a español
+            if (!recognition) {
+                // Solicitar acceso al micrófono
+                recognition = new webkitSpeechRecognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+                recognition.lang = 'es-ES';  // Establecer el idioma a español
 
-            recognition.onstart = function() {
-                console.log("Reconocimiento de voz iniciado.");
-            };
+                recognition.onstart = function() {
+                    console.log("Reconocimiento de voz iniciado.");
+                };
 
-            recognition.onerror = function(event) {
-                console.log("Error en el reconocimiento: " + event.error);
-                alert("Hubo un error al intentar acceder al micrófono.");
-            };
+                recognition.onerror = function(event) {
+                    console.log("Error en el reconocimiento: " + event.error);
+                    alert("Hubo un error al intentar acceder al micrófono.");
+                };
 
-            recognition.onresult = function (event) {
-                var value = "";
-                for (var i = event.resultIndex; i < event.results.length; ++i) {
-                    if (event.results[i].isFinal) {
-                        value += event.results[i][0].transcript;
+                recognition.onresult = function (event) {
+                    var value = "";
+                    for (var i = event.resultIndex; i < event.results.length; ++i) {
+                        if (event.results[i].isFinal) {
+                            value += event.results[i][0].transcript;
+                        }
                     }
-                }
-                if (value != "") {
-                    document.lastEventDetail = value;  // Guardar en variable global
-                }
-            };
+                    if (value != "") {
+                        document.lastEventDetail = value;  // Guardar en variable global
+                        window.parent.postMessage({ type: "streamlit_set_value", value: value }, "*");  // Enviar el valor a Streamlit
+                    }
+                };
 
-            // Iniciar el reconocimiento de voz
-            recognition.start();
+                // Iniciar el reconocimiento de voz
+                recognition.start();
+            }
         });
     </script>
 """
