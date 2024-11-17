@@ -42,22 +42,32 @@ st.write("Toca el Botón y habla")
 
 st.markdown("""
     <style>
+        /* Estilo para el botón */
         .stButton button {
-            background-color: black;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            font-size: 25px;
-            cursor: pointer;
-            border-radius: 5px;
+            background-color: black;  /* Fondo negro */
+            color: white;  /* Texto blanco */
+            border: none;  /* Elimina el borde */
+            padding: 10px 40px;  /* Espaciado interno */
+            font-size: 18px;  /* Tamaño del texto */
+            cursor: pointer;  /* Cambia el cursor al pasar el mouse */
+            border-radius: 5px;  /* Bordes redondeados */
+            box-shadow: none;  /* Elimina cualquier sombra */
         }
+        
+        /* Cambio de color al pasar el ratón */
         .stButton button:hover {
-            background-color: #333;
+            background-color: #333;  /* Gris oscuro cuando se pasa el mouse */
+        }
+
+        /* Estilo para eliminar el fondo blanco alrededor del botón */
+        .stButton {
+            background-color: transparent;  /* Fondo transparente */
+            border: none;  /* Sin borde alrededor del botón */
         }
     </style>
 """, unsafe_allow_html=True)
 
-stt_button = Button(label=" Habla 🎙️ ", width=200)
+stt_button = Button(label=" Habla 🎙️ ", width=100)
 
 stt_button.js_on_event("button_click", CustomJS(code="""
     var recognition = new webkitSpeechRecognition();
