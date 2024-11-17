@@ -42,27 +42,27 @@ st.write("Toca el Botón y habla")
 
 st.markdown("""
     <style>
-        /* Estilo para el botón */
-        .stButton button {
-            background-color: black;  /* Fondo negro */
-            color: white;  /* Texto blanco */
-            border: none;  /* Elimina el borde */
-            padding: 10px 40px;  /* Espaciado interno */
-            font-size: 18px;  /* Tamaño del texto */
-            cursor: pointer;  /* Cambia el cursor al pasar el mouse */
-            border-radius: 5px;  /* Bordes redondeados */
-            box-shadow: none;  /* Elimina cualquier sombra */
-        }
-        
-        /* Cambio de color al pasar el ratón */
-        .stButton button:hover {
-            background-color: #333;  /* Gris oscuro cuando se pasa el mouse */
+        /* Estilo para el contenedor del botón */
+        .stButton {
+            background-color: transparent !important;  /* Elimina cualquier fondo alrededor del botón */
+            border: none !important;  /* Elimina el borde alrededor del contenedor */
+            box-shadow: none !important;  /* Elimina cualquier sombra alrededor del contenedor */
         }
 
-        /* Estilo para eliminar el fondo blanco alrededor del botón */
-        .stButton {
-            background-color: transparent;  /* Fondo transparente */
-            border: none;  /* Sin borde alrededor del botón */
+        /* Estilo para el botón */
+        .stButton button {
+            background-color: black !important;  /* Fondo negro para el botón */
+            color: white !important;  /* Texto blanco para el botón */
+            border: none !important;  /* Elimina cualquier borde del botón */
+            padding: 10px 40px !important;  /* Espaciado interno del botón */
+            font-size: 18px !important;  /* Tamaño de la fuente */
+            cursor: pointer !important;  /* Cursor de mano al pasar sobre el botón */
+            border-radius: 5px !important;  /* Bordes redondeados */
+        }
+
+        /* Cambio de color al pasar el ratón */
+        .stButton button:hover {
+            background-color: #333 !important;  /* Gris oscuro al pasar el ratón */
         }
     </style>
 """, unsafe_allow_html=True)
