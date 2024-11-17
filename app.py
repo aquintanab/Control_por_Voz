@@ -109,3 +109,18 @@ if result:
         os.mkdir("temp")
     except:
         pass
+
+st.markdown("""
+    <a href='https://gardenvoice.streamlit.app/' target='_blank'>
+        <button style='
+            background-color: #FF4B4B;
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 4px 2px;
+        '>Regresar</button>
+    </a>
+    """, unsafe_allow_html=True)
+
